@@ -61,9 +61,3 @@ We use the following dependencies in this project:
 - This project does not (yet) incorporate participant audio or screen media tracks. If you can't hear other participants, don't be alarmed!
 
 - Staging tracks and updating receive settings will only work when the call is running in SFU mode. To illustrate this we're calling `setNetworkTopology` which is not recommended for production applications.
-
----
-
-## Further optimisations
-
-- React context are a great way to implement Redux-like states into our application although our application is render heavy without memoized selectors/reselectors.
