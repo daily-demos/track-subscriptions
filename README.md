@@ -1,5 +1,11 @@
 # Track subscriptions, pagination & receive settings
 
+Daily [call object mode](https://docs.daily.co/docs/build-a-custom-video-chat-interface) demo to show how to handle track subscriptions, custom video grid pagination, and receive (simulcast encoding) settings. This demo app will be useful for anyone focusing on improving performance for large meetings in their custom Daily app and/or building a custom video grid layout.
+
+---
+
+## Why use manual track subscriptions?
+
 When call sizes exceed a certain volume (~12 or more participants) it's important to start optimising for both bandwidth and CPU. Switching from automatic to manual track subscriptions allows each client to specify which participants they want to receive video and/or audio from, reducing how much data needs to be downloaded as well as the number of connections our servers maintain.
 
 The most common application for this in a video call application is pagination; allowing users to subscribe and stage a subset of active call participants based on their onscreen visibility and call status.
@@ -19,11 +25,11 @@ This project demonstrates both of these concepts with the help of two new featur
 
 ### See it in action:
 
-➡️ [Click here](https://track-subscriptions.vercel.app/)
+➡️ [Deployed demo](https://track-subscriptions.vercel.app/)
 
 ### Read the full guide:
 
-➡️ [Click here](https://www.notion.so/dailyco/Manually-managing-video-tracks-and-optimising-performance-using-updateReceiveSettings-20784b30d2a344df8310ae6386d70525)
+➡️ [Demo guide](https://www.notion.so/dailyco/Manually-managing-video-tracks-and-optimising-performance-using-updateReceiveSettings-20784b30d2a344df8310ae6386d70525)
 
 ---
 
