@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { IconButton, ArrowLeftIcon, ArrowRightIcon } from "evergreen-ui";
 import { useDeepCompareEffect, useDeepCompareMemo } from "use-deep-compare";
 
 import { useParticipants } from "../contexts/ParticipantProvider";
 import { useTracks } from "../contexts/TracksProvider";
-
-import { useAspectGrid } from "../hooks/useAspectGrid";
 import { sortByKey } from "../libs/sortByKey";
+import { useAspectGrid } from "../hooks/useAspectGrid";
 import Tile from "./Tile";
 
 export const PaginatedGrid = ({ autoLayers }) => {
@@ -16,25 +15,24 @@ export const PaginatedGrid = ({ autoLayers }) => {
 
   // -- Hooks
 
-  const { participants, updateReceiveSettings } = useParticipants();
+  const {
+    participants,
+    updateReceiveSettings,
+    swapParticipantPosition,
+    activeParticipantId,
+  } = useParticipants();
   const { updateCamSubscriptions } = useTracks();
   const { page, pages, pageSize, setPage, tileWidth, tileHeight } =
     useAspectGrid(gridRef, participants?.length || 0);
 
   // -- Pagination
 
-  // Sort participants by their position in the grid
-  const sortedParticipants = useMemo(
-    () => participants.sort((a, b) => sortByKey(a, b, "position")),
-    [participants]
-  );
-
   // Participants that are visible on the current page
   const visibleParticipants = useMemo(() => {
-    return sortedParticipants.length - page * pageSize > 0
-      ? sortedParticipants.slice((page - 1) * pageSize, page * pageSize)
-      : sortedParticipants.slice(-pageSize);
-  }, [page, pageSize, sortedParticipants]);
+    return participants.length - page * pageSize > 0
+      ? participants.slice((page - 1) * pageSize, page * pageSize)
+      : participants.slice(-pageSize);
+  }, [page, pageSize, participants]);
 
   const handlePrevClick = () => {
     setPage((p) => p - 1);
@@ -123,6 +121,45 @@ export const PaginatedGrid = ({ autoLayers }) => {
       )),
     [tileWidth, tileHeight, autoLayers, visibleParticipants]
   );
+
+  // -- Active speaker
+
+  /**
+   * Handle position updates based on active speaker events
+   */
+  const handleActiveSpeakerChange = useCallback(
+    (peerId) => {
+      if (!peerId) return;
+      // active participant is already visible
+      if (visibleParticipants.some(({ id }) => id === peerId)) return;
+      // ignore repositioning when viewing page > 1
+      if (page > 1) return;
+
+      /**
+       * We can now assume that
+       * a) the user is looking at page 1
+       * b) the most recent active participant is not visible on page 1
+       * c) we'll have to promote the most recent participant's position to page 1
+       *
+       * To achieve that, we'll have to
+       * - find the least recent active participant on page 1
+       * - swap least & most recent active participant's position via setParticipantPosition
+       */
+      const sortedVisibleRemoteParticipants = visibleParticipants
+        .filter(({ isLocal }) => !isLocal)
+        .sort((a, b) => sortByKey(a, b, "lastActiveDate"));
+
+      if (!sortedVisibleRemoteParticipants.length) return;
+
+      swapParticipantPosition(sortedVisibleRemoteParticipants[0].id, peerId);
+    },
+    [page, swapParticipantPosition, visibleParticipants]
+  );
+
+  useEffect(() => {
+    if (page > 1 || !activeParticipantId) return;
+    handleActiveSpeakerChange(activeParticipantId);
+  }, [activeParticipantId, handleActiveSpeakerChange, page]);
 
   // -- Receive settings
 

@@ -5,6 +5,7 @@ export const PARTICIPANT_UPDATED = "participant-updated";
 export const PARTICIPANT_LEFT = "participant-left";
 export const SWAP_POSITION = "swap-position";
 export const UPDATE_LAYER = "update-layer";
+export const ACTIVE_SPEAKER = "active-speaker";
 
 export const initialState = {
   participants: [
@@ -47,6 +48,31 @@ function createOrUpdateParticipant(participant, participants) {
 
 export function participantsReducer(prevState, action) {
   switch (action.type) {
+    case ACTIVE_SPEAKER: {
+      const { participants, ...state } = prevState;
+      if (!action.id)
+        return {
+          ...prevState,
+          lastPendingUnknownActiveSpeaker: null,
+        };
+      const date = new Date();
+      const isParticipantKnown = participants.some((p) => p.id === action.id);
+      return {
+        ...state,
+        lastPendingUnknownActiveSpeaker: isParticipantKnown
+          ? null
+          : {
+              date,
+              id: action.id,
+            },
+        participants: participants.map((p) => ({
+          ...p,
+          isActiveSpeaker: p.id === action.id,
+          lastActiveDate: p.id === action.id ? date : p?.lastActiveDate,
+        })),
+      };
+    }
+
     case PARTICIPANT_JOINED: {
       const item = createOrUpdateParticipant(action.participant);
       const participants = [...prevState.participants];

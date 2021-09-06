@@ -12,6 +12,7 @@ import {
   PARTICIPANT_UPDATED,
   PARTICIPANT_LEFT,
   SWAP_POSITION,
+  ACTIVE_SPEAKER,
   UPDATE_LAYER,
   initialState,
   participantsReducer,
@@ -33,6 +34,11 @@ export const ParticipantProvider = ({ callObject, children }) => {
   const activeParticipant = useMemo(
     () => participants.find(({ isActiveSpeaker }) => isActiveSpeaker),
     [participants]
+  );
+
+  const activeParticipantId = useMemo(
+    () => activeParticipant?.id,
+    [activeParticipant]
   );
 
   const handleNewParticipantsState = useCallback(
@@ -90,18 +96,6 @@ export const ParticipantProvider = ({ callObject, children }) => {
   }, [callObject, handleNewParticipantsState]);
 
   /**
-   * Position in grid
-   */
-  const swapParticipantPosition = (id1, id2) => {
-    if (id1 === id2 || !id1 || !id2 || isLocalId(id1) || isLocalId(id2)) return;
-    dispatch({
-      type: SWAP_POSITION,
-      id1,
-      id2,
-    });
-  };
-
-  /**
    * Active speaker
    */
   useEffect(() => {
@@ -122,6 +116,16 @@ export const ParticipantProvider = ({ callObject, children }) => {
     return () =>
       callObject.off("active-speaker-change", handleActiveSpeakerChange);
   }, [callObject]);
+
+  const swapParticipantPosition = (id1, id2) => {
+    if (id1 === id2 || !id1 || !id2 || id1 === "local" || id2 === "local")
+      return;
+    dispatch({
+      type: SWAP_POSITION,
+      id1,
+      id2,
+    });
+  };
 
   /**
    * Listen for changes in receive settings
@@ -170,6 +174,7 @@ export const ParticipantProvider = ({ callObject, children }) => {
       value={{
         participants,
         activeParticipant,
+        activeParticipantId,
         updateReceiveSettings,
         swapParticipantPosition,
         setLayerForParticipant,
