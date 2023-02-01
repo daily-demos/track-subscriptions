@@ -73,7 +73,7 @@ export const ParticipantProvider = ({ callObject, children }) => {
    * Participant state
    */
   useEffect(() => {
-    if (!callObject) return false;
+    if (!callObject) return;
 
     const events = [
       "joined-meeting",
@@ -99,7 +99,7 @@ export const ParticipantProvider = ({ callObject, children }) => {
    * Active speaker
    */
   useEffect(() => {
-    if (!callObject) return false;
+    if (!callObject) return;
 
     const handleActiveSpeakerChange = ({ activeSpeaker }) => {
       // Ignore active-speaker-change events for the local user

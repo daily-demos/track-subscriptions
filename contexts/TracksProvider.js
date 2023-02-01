@@ -102,7 +102,7 @@ export const TrackProvider = ({ callObject, children }) => {
    * Listen and keep state of track events
    */
   useEffect(() => {
-    if (!callObject) return false;
+    if (!callObject) return;
 
     const handleTrackUpdate = ({ action, participant, track }) => {
       if (!participant) return;
