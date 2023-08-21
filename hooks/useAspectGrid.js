@@ -1,20 +1,25 @@
 import { useState, useMemo, useEffect } from "react";
 
 // --- Constants
-
-export const MIN_TILE_WIDTH = 280;
 export const DEFAULT_ASPECT_RATIO = 16 / 9;
 
 export const useAspectGrid = (
   gridRef,
   numTiles,
-  customMaxTilesPerPage = 12
+  customMaxTilesPerPage = 20
 ) => {
   // -- State
   const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [maxTilesPerPage] = useState(customMaxTilesPerPage);
+
+  // Calculate the tile width based on number of tiles per page
+  const MIN_TILE_WIDTH = useMemo(() => {
+    const { width } = dimensions;
+    const maxColumnsForCustomMax = Math.max(1, Math.floor(width / customMaxTilesPerPage));
+    return width / maxColumnsForCustomMax;
+  }, [dimensions, customMaxTilesPerPage]);
 
   // -- Layout / UI
 
@@ -52,7 +57,7 @@ export const useAspectGrid = (
     const widthPerTile = width / columns;
     const rows = Math.max(1, Math.floor(height / (widthPerTile * (9 / 16))));
     return [columns, rows];
-  }, [dimensions]);
+  }, [dimensions, MIN_TILE_WIDTH]);
 
   // Memoized count of how many tiles can we show per page
   const pageSize = useMemo(
