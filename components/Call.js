@@ -46,12 +46,12 @@ export const Call = ({ roomUrl }) => {
     if (!callObject) return;
 
     callObject.join().catch((err) => {
-      console.error(err);
+      console.error(`Failed to join: ${err}`);
     });
 
     // Force SFU mode for demo.
     callObject.setNetworkTopology({ topology: "sfu" }).catch((err) => {
-      console.error(err);
+      console.error(`Failed to update network topology: ${err}`);
     });
 
     setLocalVideo(callObject.localVideo());
