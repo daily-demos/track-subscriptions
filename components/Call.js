@@ -1,4 +1,4 @@
-import Daily from "@daily-co/daily-js";
+import { useDaily } from "@daily-co/daily-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Spinner,
@@ -13,33 +13,18 @@ import {
   Pane,
   IconButton,
 } from "evergreen-ui";
-import generateName from "sillyname";
 import { ParticipantProvider } from "../contexts/ParticipantProvider";
 import { TrackProvider } from "../contexts/TracksProvider";
 import PaginatedGrid from "./PaginatedGrid";
 import Sidebar from "./Sidebar";
 
 export const Call = ({ roomUrl }) => {
-  const [callObject, setCallObject] = useState(null);
   const [callState, setCallState] = useState("joining");
   const [showSidebar, setShowSidebar] = useState(false);
   const [localVideo, setLocalVideo] = useState(true);
   const [autoLayers, setAutoLayers] = useState(true);
 
-  const join = useCallback(
-    async (callObject) => {
-      await callObject.join({
-        url: roomUrl,
-        subscribeToTracksAutomatically: false,
-        userName: generateName(),
-        audioSource: false,
-      });
-      await callObject.setNetworkTopology({ topology: "sfu" });
-
-      setLocalVideo(callObject.localVideo());
-    },
-    [roomUrl]
-  );
+  const callObject = useDaily();
 
   const leave = useCallback(() => {
     callObject.destroy();
@@ -58,16 +43,19 @@ export const Call = ({ roomUrl }) => {
   );
 
   useEffect(() => {
-    if (callObject) return;
+    if (!callObject) return;
 
-    // Create new Daily call object
-    const co = Daily.createCallObject();
+    callObject.join().catch((err) => {
+      console.error(err);
+    });
 
-    // Join the call
-    join(co);
+    // Force SFU mode for demo.
+    callObject.setNetworkTopology({ topology: "sfu" }).catch((err) => {
+      console.error(err);
+    });
 
-    setCallObject(co);
-  }, [callObject, join]);
+    setLocalVideo(callObject.localVideo());
+  }, [setLocalVideo, callObject]);
 
   useEffect(() => {
     if (!callObject) return;
