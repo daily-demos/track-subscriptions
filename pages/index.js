@@ -3,6 +3,8 @@ import Head from "next/head";
 import { Alert, Button, ThemeProvider } from "evergreen-ui";
 import Call from "../components/Call";
 import theme from "../styles/theme";
+import generateName from "sillyname";
+import { DailyProvider } from "@daily-co/daily-react";
 
 export default function Home() {
   const [creatingRoom, setCreatingRoom] = useState(false);
@@ -51,7 +53,14 @@ export default function Home() {
           </Button>
         </main>
       ) : (
-        <Call roomUrl={roomUrl} />
+        <DailyProvider
+          url={roomUrl}
+          subscribeToTracksAutomatically={false}
+          audioSource={false}
+          userName={generateName()}
+        >
+          <Call roomUrl={roomUrl} />
+        </DailyProvider>
       )}
     </ThemeProvider>
   );
